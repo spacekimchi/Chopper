@@ -1,0 +1,25 @@
+{
+    "manifest_version": 2,
+    "name": "Chopper",
+    "version": "1.0",
+    "description": "Adds to your Chopping List",
+    "icons": {
+        "48": "icons/chopperx48.png"
+    },
+    "homepage_url": "https://choppinglist.org",
+    "permissions": [
+        "activeTab",
+        "http://localhost:8000/*",
+        "https://localhost:8000/*"
+    ],
+    "browser_action": {
+        "default_icon": "icons/chopperx48.png",
+        "default_title": "Chopper",
+        "default_popup": "popup/chopper.html"
+    },
+    "background": {
+        "scripts": ["background_scripts/chopper.js"],
+        "persistent": false
+    }
+}
+
