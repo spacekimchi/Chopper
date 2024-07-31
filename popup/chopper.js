@@ -34,11 +34,15 @@ function reportExecuteScriptError(error) {
   console.error(`Failed to execute beastify content script: ${error.message}`);
 }
 
-
-browser.tabs
-  .executeScript({ file: "/content_scripts/chopper.js" })
-  .then(listenForClicks)
-  .catch(reportExecuteScriptError);
+browser.tabs.query({active: true, currentWindow: true})
+    .then(tabs => {
+        return browser.scripting.executeScript({
+            target: {tabId: tabs[0].id},
+            files: ["/content_scripts/chopper.js"]
+        });
+    })
+    .then(listenForClicks)
+    .catch(reportExecuteScriptError);
 
 function sendToBackend(text) {
     console.log("I AM GOING TO TRY TO SEND TEXT:", text);
