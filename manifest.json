@@ -6,7 +6,7 @@
     "icons": {
         "48": "icons/chopperx48.png"
     },
-    "homepage_url": "https://choppinglist.org",
+    "homepage_url": "http://localhost:8000",
     "permissions": [
         "activeTab",
         "scripting"
@@ -24,5 +24,8 @@
         "gecko": {
             "id": "chopper@chopping_list.org"
         }
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:8000 https://localhost:8000"
     }
 }
