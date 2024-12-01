@@ -1,9 +1,0 @@
-{
-    "nytimes": [".recipe"],
-    "pillsbury": {
-        "classNames": [
-            ".recipeIngredients.primary",
-            ".recipeSteps.primary"
-        ]
-    }
-}

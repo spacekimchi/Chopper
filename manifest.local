@@ -6,14 +6,15 @@
     "icons": {
         "48": "icons/chopperx48.png"
     },
-    "homepage_url": "https://choppinglist.co",
+    "homepage_url": "http://localhost:3000",
     "permissions": [
         "activeTab",
         "scripting",
         "cookies"
     ],
     "host_permissions": [
-        "https://choppinglist.co/*"
+        "https://choppinglist.co/*",
+        "http://*.localhost/*"
     ],
     "action": {
         "default_icon": "icons/chopperx48.png",
@@ -26,6 +27,6 @@
         }
     },
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://choppinglist.co"
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:3000 https://localhost:3000"
     }
 }

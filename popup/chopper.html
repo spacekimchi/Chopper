@@ -1,19 +1,23 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="chopper.css" />
-  </head>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="chopper.css" />
+    </head>
 
-  <body>
-    <div id="popup-content" style="height: 250px; width: 100px;">
-        Fetching
-    </div>
-    <div id="error-content" class="hidden">
-      <p>Failed to chop chop chop...</p>
-      <p>Sad. We'll have someone look at this ASAP.</p>
-    </div>
-    <script src="chopper.js"></script>
-  </body>
+    <body>
+        <div class="title">Chopping List</div>
+        <div class="text-container">
+            <img src="/icons/3-dots-rotate.svg" alt="Loading..." class="hidden" id="loading-spinner"/>
+            <div id="popup-content">
+            </div>
+            <div id="error-content" class="hidden">
+                Something went wrong...
+                <br>
+                We will into this right away!
+            </div>
+        </div>
+        <script src="chopper.js"></script>
+    </body>
 </html>
 
