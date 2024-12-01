@@ -24,11 +24,6 @@
       // /bar/cat
       const pathname = window.location.pathname;
       const textAndImage = getArticleTextAndImage();
-      // debugger;
-      // textAndImage['text'] = "";
-      if (textAndImage['text'] == "") {
-        return;
-      }
       sendResponse({
         text: textAndImage['text'],
         imageUrls: textAndImage['imageUrls'],
@@ -80,7 +75,7 @@
 
   function grabText() {
     // Define the exclusion strings (case-insensitive)
-    const exclusionStrings = ['comment', 'conversation', 'question', 'review', 'adthrive', 'google_ad', 'media', 'skip', 'breadcrumb', 'disclosure', 'drawer-nav', '-nav', 'nav-', 'social', 'footer', 'press-', '-press', 'icon', 'widget-posts', 'post-widget', 'discussion', 'carousel', 'rating', 'notessection', 'newsletters', 'creditstag'];
+    const exclusionStrings = ['comment', 'conversation', 'question', 'review', 'adthrive', 'google_ad', 'media', 'skip', 'breadcrumb', 'disclosure', 'drawer-nav', '-nav', 'nav-', 'social', 'footer', 'press-', '-press', 'widget-posts', 'post-widget', 'discussion', 'carousel', 'rating', 'notessection', 'newsletters', 'creditstag'];
 
     // Elements to exclude by tag name (case-insensitive)
     const elementsToExclude = [
@@ -94,7 +89,8 @@
       'noscript',
       'code',
       'pre',
-      'textarea'
+      'textarea',
+      'svg'
     ];
 
     /**

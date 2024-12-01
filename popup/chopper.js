@@ -1,4 +1,8 @@
-/**
+const isDevelopment = true; // Set to false for production
+const BACKEND_DOMAIN = isDevelopment
+  ? 'http://localhost:3000'
+  : 'https://choppinglist.co';
+/*
  * Listen for clicks on the buttons, and send the appropriate message to
  * the content script in the page.
  */
@@ -22,7 +26,8 @@ function listenForClicks() {
         });
       } else {
         // Need to send to backend that we weren't able to find a recipe on the page
-        setPopupContent('Unable to find any text to send!');
+        let popupContent = document.querySelector("#popup-content");
+        popupContent.innerHTML = 'Unable to find any text to send!';
       }
     })
     .catch(error => console.error("Error in scrapeAndSend:", error));
@@ -50,11 +55,6 @@ function reportExecuteScriptError(error) {
   document.querySelector("#error-content").classList.remove("hidden");
 }
 
-function setPopupContent(content) {
-  let popupContent = document.querySelector("#popup-content");
-  popupContent.innerHTML = content;
-}
-
 async function getCookies(domain) {
   return new Promise((resolve) => {
     browser.cookies.getAll({domain: domain}, (cookies) => {
@@ -74,62 +74,70 @@ browser.tabs.query({active: true, currentWindow: true})
   .catch(reportExecuteScriptError);
 
 async function sendToBackend(params) {
-  setPopupContent('Fetching');
-  let content = document.querySelector("#popup-content");
-  // let handle = setInterval(function() {
-  //     content.innerText = `Fetching${'.'.repeat(counter % 4)}`;
-  //     counter += 1;
-  // }, 1000);
-  const domain = 'http://localhost:3000';  // or your actual domain
+  const popupContent = document.querySelector("#popup-content");
+  const spinnerContainer = document.querySelector("#loading-spinner");
+
+  const domain = `${BACKEND_DOMAIN}`;
   const cookies = await getCookies(domain);
   const cookieHeader = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
-  setPopupContent('Fetching Form');
+  spinnerContainer.classList.remove("hidden");
 
-  // Fetch the form
-  const response = await fetch('http://localhost:3000/extension_form', {
-    credentials: 'include',
-    headers: {
-      'Cookie': cookieHeader
+  const response = await fetch(`${BACKEND_DOMAIN}/extension_form`, {
+    credentials: 'include'
+  });
+  if (response.status === 403) {
+    spinnerContainer.classList.add("hidden");
+    popupContent.innerHTML = 'Please verify your email first!';
+    return;
+  } else if (response.status === 401) {
+    spinnerContainer.classList.add("hidden");
+    popupContent.innerHTML = `Please sign in first<br><a href="${BACKEND_DOMAIN}/sign_in" target="_blank">Sign In</a>`;
+    return;
+  } else if (response.status !== 200) {
+    spinnerContainer.classList.add("hidden");
+    popupContent.innerHTML = `Error fetching form: ${response.status}`;
+    return;
+  } else {
+    spinnerContainer.classList.remove("hidden");
+    popupContent.innerHTML = `Submitting Recipe`;
+    const html = await response.text();
+
+    // Parse the HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Get the form
+    const form = doc.querySelector('form#extension-recipe-form');
+    const formAction = form.action;
+
+    // Fill out the form
+    const formData = new FormData(form);
+    formData.set('text', params.text);
+    formData.set('source_url', params.sourceUrl);
+    formData.set('hostname', params.hostname);
+    formData.set('pathname', params.pathname);
+    params.imageUrls.forEach((url) => {
+      formData.append('imageUrls[]', url);
+    });
+
+    // Submit the form
+    const submitResponse = await fetch(formAction, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        'Cookie': cookieHeader
+      }
+    });
+    if (submitResponse.status === 201) {
+      const result = await submitResponse.text();
+      spinnerContainer.classList.add("hidden");
+      popupContent.innerHTML = `Saved Recipe! <div>View your recipes <a href="${BACKEND_DOMAIN}/recipes">here</a></div>`;
+      return result;
+    } else {
+      spinnerContainer.classList.add("hidden");
+      popupContent.innerHTML = "Something went wrong when submitting... <div>We'll look into it right away</div>";
+      return "";
     }
-  });
-  const html = await response.text();
-
-
-  // Parse the HTML
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-
-  // Get the form
-  const form = doc.querySelector('form#extension-recipe-form');
-  const token = doc.querySelector("input[name='authenticity_token']").value;
-  const formAction = form.action;
-
-  // Fill out the form
-  const formData = new FormData(form);
-  formData.set('text', params.text);
-  formData.set('authenticity_token', token);
-  formData.set('source_url', params.sourceUrl);
-  formData.set('hostname', params.hostname);
-  formData.set('pathname', params.pathname);
-  params.imageUrls.forEach((url) => {
-    formData.append('imageUrls[]', url);
-  });
-
-
-  setPopupContent('Submitting Recipe');
-  // Submit the form
-  const submitResponse = await fetch(formAction, {
-    method: 'POST',
-    body: formData,
-    credentials: 'include',
-    headers: {
-      'Cookie': cookieHeader
-    }
-  });
-
-  const result = await submitResponse.text(); // Expecting HTML response
-  setPopupContent('Success!');
-  // clearInterval(handle);
-  // handle = 0;
-  return result;
+  }
 }
